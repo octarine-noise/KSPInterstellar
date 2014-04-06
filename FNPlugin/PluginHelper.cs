@@ -477,9 +477,6 @@ namespace FNPlugin {
 				warning_displayed = true;
 			}
 		}
-
-        
-
         
     }
 }
