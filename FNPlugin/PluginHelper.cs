@@ -35,6 +35,8 @@ namespace FNPlugin {
         public static string water_resource_name = "LqdWater";
         public static string hydrogen_peroxide_resource_name = "H2Peroxide";
         public static string ammonia_resource_name = "Ammonia";
+        public static bool using_toolbar = false;
+
         public const int interstellar_major_version = 10;
         public const int interstellar_minor_version = 0;
         
@@ -43,11 +45,23 @@ namespace FNPlugin {
 		protected static bool is_thermal_dissip_disabled = false;
         protected static GameDatabase gdb;
         protected static bool resources_configured = false;
+        protected static bool tech_checked = false;
+        protected static TechUpdateWindow tech_window = null;
+        protected static int installed_tech_tree_version_id = 0;
+        protected static int new_tech_tree_version_id = 0;
         
         
         
         public static string getPluginSaveFilePath() {
             return KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/WarpPlugin.cfg";
+        }
+
+        public static string getTechTreeFilePath() {
+            return KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/tree.cfg";
+        }
+
+        public static string getNewTechTreeFilePath() {
+            return KSPUtil.ApplicationRootPath + "GameData/WarpPlugin/tree.cfg";
         }
 
         public static string getPluginSettingsFilePath() {
@@ -151,6 +165,16 @@ namespace FNPlugin {
             return config;
         }
 
+        public static ConfigNode getTechTreeFile() {
+            ConfigNode config = ConfigNode.Load(PluginHelper.getTechTreeFilePath());
+            return config;
+        }
+
+        public static ConfigNode getNewTechTreeFile() {
+            ConfigNode config = ConfigNode.Load(PluginHelper.getNewTechTreeFilePath());
+            return config;
+        }
+
         public static bool lineOfSightToSun(Vessel vess) {
             Vector3d a = vess.transform.position;
             Vector3d b = FlightGlobals.Bodies[0].transform.position;
@@ -219,23 +243,55 @@ namespace FNPlugin {
             float multiplier = 1;
 
             if (refbody == REF_BODY_DUNA || refbody == REF_BODY_EVE || refbody == REF_BODY_IKE || refbody == REF_BODY_GILLY) {
-                multiplier = 7.5f;
+                multiplier = 7f;
             } else if (refbody == REF_BODY_MUN || refbody == REF_BODY_MINMUS) {
                 multiplier = 5f;
             } else if (refbody == REF_BODY_JOOL || refbody == REF_BODY_TYLO || refbody == REF_BODY_POL || refbody == REF_BODY_BOP) {
-                multiplier = 12.5f;
+                multiplier = 9f;
             } else if (refbody == REF_BODY_LAYTHE || refbody == REF_BODY_VALL) {
-                multiplier = 15f;
+                multiplier = 11f;
             } else if (refbody == REF_BODY_EELOO || refbody == REF_BODY_MOHO) {
-                multiplier = 25f;
+                multiplier = 14f;
             } else if (refbody == REF_BODY_DRES) {
-                multiplier = 9.25f;
+                multiplier = 8f;
             } else if (refbody == REF_BODY_KERBIN) {
                 multiplier = 0.5f;
             } else {
                 multiplier = 0f;
             }
             return multiplier;
+        }
+
+        public void Start() {
+            tech_window = new TechUpdateWindow();
+            tech_checked = false;
+
+            if (!tech_checked) {
+                ConfigNode tech_nodes = PluginHelper.getTechTreeFile();
+                ConfigNode new_tech_nodes = PluginHelper.getNewTechTreeFile();
+
+                if (tech_nodes != null) {
+                    if (tech_nodes.HasNode("VERSION")) {
+                        ConfigNode version_node = tech_nodes.GetNode("VERSION");
+                        if (version_node.HasValue("id")) {
+                            installed_tech_tree_version_id = Convert.ToInt32(version_node.GetValue("id"));
+                        }
+                    }
+                }
+                if (new_tech_nodes != null) {
+                    if (new_tech_nodes.HasNode("VERSION")) {
+                        ConfigNode version_node2 = new_tech_nodes.GetNode("VERSION");
+                        if (version_node2.HasValue("id")) {
+                            new_tech_tree_version_id = Convert.ToInt32(version_node2.GetValue("id"));
+                        }
+                    }
+                }
+                if (new_tech_tree_version_id > installed_tech_tree_version_id) {
+                    tech_window.Show();
+                }
+
+                tech_checked = true;
+            }
         }
 
 		public void Update() {
@@ -292,6 +348,8 @@ namespace FNPlugin {
                 }
                 
             }
+
+            
 
 			if (!plugin_init) {
                 gdb = GameDatabase.Instance;
@@ -380,14 +438,18 @@ namespace FNPlugin {
                                 mod_info.moduleName = "Thermal Nozzle";
 							}
                             
-							if(prefab_available_part.CrewCapacity > 0) {
+							if(prefab_available_part.CrewCapacity > 0 || prefab_available_part.FindModulesImplementing<ModuleCommand>().Count > 0) {
 								Type type = AssemblyLoader.GetClassByName(typeof(PartModule), "FNModuleRadiation");
 								FNModuleRadiation pm = null;
 								if(type != null) {
 									pm = prefab_available_part.gameObject.AddComponent(type) as FNModuleRadiation;
 									prefab_available_part.Modules.Add(pm);
-									double rad_hardness = prefab_available_part.mass /((double)prefab_available_part.CrewCapacity)*7.5;
+									double rad_hardness = prefab_available_part.mass /(Math.Max(prefab_available_part.CrewCapacity,0.1))*7.5;
 									pm.rad_hardness = rad_hardness;
+                                    AvailablePart.ModuleInfo minfo = new AvailablePart.ModuleInfo();
+                                    minfo.moduleName = "Radiation Status";
+                                    minfo.info = pm.GetInfo();
+                                    available_part.moduleInfos.Add(minfo);
 								}
                                 print("Adding ModuleRadiation to " + prefab_available_part.name);
 							}

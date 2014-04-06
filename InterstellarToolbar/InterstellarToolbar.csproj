@@ -4,20 +4,20 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BCA16E74-23E5-4327-9D24-B908A8CE3836}</ProjectGuid>
+    <ProjectGuid>{E07DD2EF-6BDB-4519-92C3-6C9E2D944361}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenResourceSystem</RootNamespace>
-    <AssemblyName>OpenResourceSystem_1_1_0</AssemblyName>
+    <RootNamespace>InterstellarToolbar</RootNamespace>
+    <AssemblyName>InterstellarToolbar</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\GameData\OpenResourceSystem\Plugins\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,64 +25,46 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\GameData\OpenResourceSystem\Plugins\</OutputPath>
+    <OutputPath>..\GameData\WarpPlugin\Plugins\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="OpenResourceSystem_1_1_0">
+      <HintPath>..\GameData\OpenResourceSystem\Plugins\OpenResourceSystem_1_1_0.dll</HintPath>
+      <Aliases>global, ORSv1_1</Aliases>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Toolbar">
+      <HintPath>..\GameData\000_Toolbar\Toolbar.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="WarpPlugin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\GameData\WarpPlugin\Plugins\WarpPlugin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ORSAtmosphericExtractor.cs" />
-    <Compile Include="ORSAtmosphericResourceHandler.cs" />
-    <Compile Include="ORSAtmosphericResource.cs" />
-    <Compile Include="ORSModuleResourceExtraction.cs" />
-    <Compile Include="ORSOceanicResource.cs" />
-    <Compile Include="ORSPlanetaryResourceInfo.cs" />
-    <Compile Include="ORSPlanetaryResourceMapData.cs" />
-    <Compile Include="ORSPlanetaryResourcePixel.cs" />
-    <Compile Include="ORSHelper.cs" />
-    <Compile Include="ORSResourceManager.cs" />
-    <Compile Include="ORSResourceOvermanager.cs" />
-    <Compile Include="ORSResourceScanner.cs" />
-    <Compile Include="ORSResourceSuppliable.cs" />
-    <Compile Include="ORSResourceSuppliableModule.cs" />
-    <Compile Include="ORSResourceSupplier.cs" />
-    <Compile Include="ORSGameConstants.cs" />
-    <Compile Include="ORSOceanicResourceHandler.cs" />
+    <Compile Include="InterstellarToolbar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ORSResourceAbundanceMarker.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\GameData\OpenResourceSystem\**\*.*">
-      <Link>\OpenResourceSystem\%(RecursiveDir)%(FileName)</Link>
-      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="OpenResourceSystem\Plugins\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
