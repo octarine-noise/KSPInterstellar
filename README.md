@@ -1,4 +1,4 @@
-KSPInterstellar
+KSPInterstellar (experimental)
 ===============
 
 KSP Instellar Mod for Kerbal Space Program
