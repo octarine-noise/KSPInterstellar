@@ -3,8 +3,8 @@
 
 Version Experimental
 - Fixed data collection on magnetometer.
-- //Added more details to generator, reactor and radiator modules.
-- //Added atmospheric intake functionality to atmospheric scoops.
+- Added more details to generator, reactor and radiator modules.
+- Added atmospheric intake functionality to atmospheric scoops.
 - Charging is now disabled by default on the alcubierre drives.
 - Added 1000 EC to computer core, and increased torque to 5/5/5.
 - //Added a more detailed tooltip description for the computer core.
