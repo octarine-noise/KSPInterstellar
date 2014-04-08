@@ -281,13 +281,36 @@ namespace FNPlugin {
                 connectedsatsi = activeSatsIncr;
                 connectedrelaysi = usedRelays.Count;
                 
-                // dynamicly configured power reception
-                curDemand = getCurrentResourceDemand("Megajoules") + getCurrentResourceDemand("ElectricCharge"); // find the current demand 
-                maxDemand = Math.Max(curDemand, maxDemand); // save the maximum demand
-                
-                //if throttled up, use maximum demand up to the maximum available power, else only recieve the minimum demand
-                if (FlightInputHandler.state.mainThrottle != 0f) powerInputMegajoules = Math.Min(maxDemand, total_power / 1000.0 * GameConstants.microwave_dish_efficiency * atmosphericefficiency);
-                else powerInputMegajoules = Math.Min(curDemand, total_power / 1000.0 * GameConstants.microwave_dish_efficiency * atmosphericefficiency);
+                // dynamicly configure power reception
+                List<Part> parts = vessel.parts;  // lets find the maxPower in those part configs for each engine
+                float eEnginePower = 0; //we'll save total electric engine power here
+                foreach (Part part in parts)
+                {
+                    foreach (PartModule partModules in part.Modules) //search part modules
+                    {
+                        var eEngine = partModules as ElectricEngineController;
+ 
+                        if (eEngine != null) // is it an electric engine?
+                        {
+                            var engine = eEngine.part.Modules["ModuleEngines"] as ModuleEngines;
+
+                            if (engine.isOperational) // is it activated?
+                            {
+                                // add each engine's power that we've found
+                                eEnginePower += eEngine.maxPower; 
+                            }
+                        }
+                    }
+
+                }
+
+                minDemand = getCurrentResourceDemand("Megajoules") + getCurrentResourceDemand("ElectricCharge");// fallback for minimum demand
+                maxDemand = eEnginePower * FlightGlobals.ActiveVessel.ctrlState.mainThrottle; // save the maximum demand scaled to the current throttle
+                                
+                //if throttled up, recieve the maximum of demand up to the maximum available power (ie. atmo, dist, angle, total supply)
+                if (FlightGlobals.ActiveVessel.ctrlState.mainThrottle > 0.0f) powerInputMegajoules = Math.Min(maxDemand, total_power / 1000.0 * GameConstants.microwave_dish_efficiency * atmosphericefficiency);
+                // else only recieve the minimum demand (just enough to keep the lights running) again, if enough available power
+                else powerInputMegajoules = Math.Min(minDemand, total_power / 1000.0 * GameConstants.microwave_dish_efficiency * atmosphericefficiency);
 
                 powerInput = powerInputMegajoules * 1000.0f * receiptPower/100.0f;
 
