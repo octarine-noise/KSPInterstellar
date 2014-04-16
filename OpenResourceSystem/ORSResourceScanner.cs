@@ -47,7 +47,7 @@ namespace OpenResourceSystem {
 
         public override void OnFixedUpdate() {
             CelestialBody body = vessel.mainBody;
-            ORSPlanetaryResourcePixel res_pixel = ORSPlanetaryResourceMapData.getResourceAvailability(vessel.mainBody.flightGlobalsIndex, resourceName, body.GetLatitude(vessel.transform.position), body.GetLongitude(vessel.transform.position));
+            ORSPlanetaryResourcePixel res_pixel = ORSPlanetaryResourceMapData.getResourceAvailability(vessel.mainBody, resourceName, body.GetLatitude(vessel.transform.position), body.GetLongitude(vessel.transform.position));
             abundance = res_pixel.getAmount();
         }
 

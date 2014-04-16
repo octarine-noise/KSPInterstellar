@@ -81,7 +81,7 @@ namespace FNPlugin {
             CelestialBody cur_ref_body = FlightGlobals.ActiveVessel.mainBody;
             CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
 
-            ORSPlanetaryResourcePixel res_pixel = ORSPlanetaryResourceMapData.getResourceAvailability(vessel.mainBody.flightGlobalsIndex, "Thorium", cur_ref_body.GetLatitude(vessel.transform.position), cur_ref_body.GetLongitude(vessel.transform.position));
+            ORSPlanetaryResourcePixel res_pixel = ORSPlanetaryResourceMapData.getResourceAvailability(vessel.mainBody, "Thorium", cur_ref_body.GetLatitude(vessel.transform.position), cur_ref_body.GetLongitude(vessel.transform.position));
             double ground_rad = Math.Sqrt(res_pixel.getAmount() * 9e6) / 24 / 365.25 / Math.Max(vessel.altitude / 870, 1);
             double rad = VanAllen.getRadiationLevel(cur_ref_body.flightGlobalsIndex, (float)FlightGlobals.ship_altitude, (float)FlightGlobals.ship_latitude);
             double divisor = Math.Pow(cur_ref_body.Radius / crefkerbin.Radius, 2.0);

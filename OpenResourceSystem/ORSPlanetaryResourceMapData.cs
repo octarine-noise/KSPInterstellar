@@ -23,8 +23,9 @@ namespace OpenResourceSystem {
         static double stored_scale = -1;
         
 
-        public static void loadPlanetaryResourceData(int body) {
-            string celestial_body_name = FlightGlobals.Bodies[body].bodyName;
+        public static void loadPlanetaryResourceData(CelestialBody cbody) {
+            int body = cbody.flightGlobalsIndex;
+            string celestial_body_name = cbody.bodyName;
             UrlDir.UrlConfig[] configs = GameDatabase.Instance.GetConfigs("PLANETARY_RESOURCE_DEFINITION");
             Debug.Log("[ORS] Loading Planetary Resource Data. Length: " + configs.Length);
             foreach (ORSResourceAbundanceMarker abundance_marker in abundance_markers) {
@@ -114,22 +115,26 @@ namespace OpenResourceSystem {
             return resource_val;
         }
 
-        public static ORSPlanetaryResourcePixel getResourceAvailabilityByRealResourceName(int body, string resourcename, double lat, double lng) {
+        public static ORSPlanetaryResourcePixel getResourceAvailabilityByRealResourceName(CelestialBody cbody, string resourcename, double lat, double lng)
+        {
+            int body = cbody.flightGlobalsIndex;
             if (body != current_body) {
-                loadPlanetaryResourceData(body);
+                loadPlanetaryResourceData(cbody);
             }
             try{
                 ORSPlanetaryResourceInfo resource_info = body_resource_maps.Where(ri => ri.Value.getResourceName() == resourcename).FirstOrDefault().Value;
-                return getResourceAvailability(body, resource_info.getName(),lat,lng);
+                return getResourceAvailability(cbody, resource_info.getName(),lat,lng);
             }catch(Exception ex) {
                 ORSPlanetaryResourcePixel resource_pixel = new ORSPlanetaryResourcePixel(resourcename, 0, body);
                 return resource_pixel;
             }
         }
 
-        public static ORSPlanetaryResourcePixel getResourceAvailability(int body, string resourcename, double lat, double lng) {
+        public static ORSPlanetaryResourcePixel getResourceAvailability(CelestialBody cbody, string resourcename, double lat, double lng)
+        {
+            int body = cbody.flightGlobalsIndex;
             if (body != current_body) {
-                loadPlanetaryResourceData(body);
+                loadPlanetaryResourceData(cbody);
             }
             int lng_s = ((int)Math.Ceiling(Math.Abs(lng / 180)) % 2);
             lng = lng % 180;
@@ -190,7 +195,7 @@ namespace OpenResourceSystem {
 
         public static void updatePlanetaryResourceMap() {
             if (FlightGlobals.currentMainBody.flightGlobalsIndex != current_body) {
-                loadPlanetaryResourceData(FlightGlobals.currentMainBody.flightGlobalsIndex);
+                loadPlanetaryResourceData(FlightGlobals.currentMainBody);
             }
 
             if (body_resource_maps.ContainsKey(displayed_resource) && (FlightGlobals.currentMainBody.flightGlobalsIndex != map_body || displayed_resource != map_resource)) {

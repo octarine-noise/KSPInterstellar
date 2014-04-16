@@ -67,7 +67,7 @@ namespace OpenResourceSystem {
                 double resource_abundance = 0;
                 bool resource_available = false;
                 if (vessel.Landed) {
-                    ORSPlanetaryResourcePixel current_resource_abundance_pixel = ORSPlanetaryResourceMapData.getResourceAvailabilityByRealResourceName(vessel.mainBody.flightGlobalsIndex, resourceName, vessel.latitude, vessel.longitude);
+                    ORSPlanetaryResourcePixel current_resource_abundance_pixel = ORSPlanetaryResourceMapData.getResourceAvailabilityByRealResourceName(vessel.mainBody, resourceName, vessel.latitude, vessel.longitude);
                     resource_abundance = current_resource_abundance_pixel.getAmount();
                 } else if (vessel.Splashed) {
                     resource_abundance = ORSOceanicResourceHandler.getOceanicResourceContent(vessel.mainBody.flightGlobalsIndex, resourceName);
@@ -132,7 +132,7 @@ namespace OpenResourceSystem {
                 }
                 double resource_abundance = 0;
                 if (vessel.Landed) {
-                    ORSPlanetaryResourcePixel current_resource_abundance_pixel = ORSPlanetaryResourceMapData.getResourceAvailabilityByRealResourceName(vessel.mainBody.flightGlobalsIndex, resourceName, vessel.latitude, vessel.longitude);
+                    ORSPlanetaryResourcePixel current_resource_abundance_pixel = ORSPlanetaryResourceMapData.getResourceAvailabilityByRealResourceName(vessel.mainBody, resourceName, vessel.latitude, vessel.longitude);
                     resource_abundance = current_resource_abundance_pixel.getAmount();
                 } else if (vessel.Splashed) {
                     resource_abundance = ORSOceanicResourceHandler.getOceanicResourceContent(vessel.mainBody.flightGlobalsIndex, resourceName);
