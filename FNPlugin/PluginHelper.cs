@@ -241,6 +241,17 @@ namespace FNPlugin {
 			}else {
 				multiplier = 0f;
 			}
+        public static string getPropertyOverrideForBody(string name, string type)
+        {
+            ConfigNode scienceOverrides = getPluginSettingsFile().GetNode("WARP_PLUGIN_PLANET_OVERRIDES");
+            if (scienceOverrides != null)
+            {
+                ConfigNode scienceOverride = scienceOverrides.GetNode(name);
+                if (scienceOverride != null && scienceOverride.HasValue(type))
+                    return scienceOverride.GetValue(type);
+            }
+            return null;
+        }
 
 			if (landed) {
 				if (refbody == REF_BODY_TYLO) {
@@ -281,6 +292,8 @@ namespace FNPlugin {
         public static double getSpecialMagneticFieldScaling(string name)
         {
             float scaling = DEFAULT_MAGNETIC_SCALING.ContainsKey(name) ? DEFAULT_MAGNETIC_SCALING[name] : 1.0f;
+            string scalingOverride = getPropertyOverrideForBody(name, "magneticScaling");
+            if (scalingOverride != null) scaling = float.Parse(scalingOverride);
             return scaling;
         }
 
