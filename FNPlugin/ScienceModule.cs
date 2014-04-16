@@ -183,7 +183,7 @@ namespace FNPlugin {
                         stupidity += proto_crew_member.stupidity;
                     }
                     stupidity = 1.5f - stupidity / 2.0f;
-                    double science_to_add = GameConstants.baseScienceRate * time_diff / 86400 * electrical_power_ratio * stupidity * global_rate_multipliers * PluginHelper.getScienceMultiplier(vessel.mainBody.flightGlobalsIndex, vessel.LandedOrSplashed) / ((float)Math.Sqrt(altitude_multiplier));
+                    double science_to_add = GameConstants.baseScienceRate * time_diff / 86400 * electrical_power_ratio * stupidity * global_rate_multipliers * PluginHelper.getScienceMultiplier(vessel.mainBody.name, vessel.LandedOrSplashed) / ((float)Math.Sqrt(altitude_multiplier));
                     //part.RequestResource ("Science", -science_to_add);
                     science_awaiting_addition = science_to_add;
 
@@ -319,7 +319,7 @@ namespace FNPlugin {
                     stupidity = 1.5f - stupidity / 2.0f;
                     float altitude_multiplier = (float)(vessel.altitude / (vessel.mainBody.Radius));
                     altitude_multiplier = Math.Max(altitude_multiplier, 1);
-                    science_rate_f = (float)(GameConstants.baseScienceRate * PluginHelper.getScienceMultiplier(vessel.mainBody.flightGlobalsIndex, vessel.LandedOrSplashed) / 86400.0f * global_rate_multipliers * stupidity / (Mathf.Sqrt(altitude_multiplier)));
+                    science_rate_f = (float)(GameConstants.baseScienceRate * PluginHelper.getScienceMultiplier(vessel.mainBody.name, vessel.LandedOrSplashed) / 86400.0f * global_rate_multipliers * stupidity / (Mathf.Sqrt(altitude_multiplier)));
                     if (ResearchAndDevelopment.Instance != null) {
                         if (!double.IsNaN(science_rate_f) && !double.IsInfinity(science_rate_f)) {
                             ResearchAndDevelopment.Instance.Science = ResearchAndDevelopment.Instance.Science + science_rate_f * TimeWarp.fixedDeltaTime;

@@ -9,6 +9,10 @@ namespace FNPlugin {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
 	public class PluginHelper : MonoBehaviour {
         public const double FIXED_SAT_ALTITUDE = 13599840256;
+
+        public static Dictionary<string, float> DEFAULT_SCIENCE = new Dictionary<string, float>();
+        public static Dictionary<string, float> DEFAULT_SCIENCE_LANDED = new Dictionary<string, float>();
+        public static Dictionary<string, float> DEFAULT_IMPACTOR = new Dictionary<string, float>();
         public static Dictionary<string, float> DEFAULT_MAGNETIC_SCALING = new Dictionary<string, float>();
 
         public const int REF_BODY_KERBOL = 0;
@@ -51,10 +55,48 @@ namespace FNPlugin {
         protected static TechUpdateWindow tech_window = null;
         protected static int installed_tech_tree_version_id = 0;
         protected static int new_tech_tree_version_id = 0;
-        
 
         private void SetupDefaultScience()
         {
+            Debug.Log("[KSP Interstellar] Setting up default science multipliers");
+            DEFAULT_SCIENCE.Add("Sun", 15f);
+            DEFAULT_SCIENCE.Add("Moho", 20f);
+            DEFAULT_SCIENCE.Add("Eve", 5f);
+            DEFAULT_SCIENCE.Add("Gilly", 5f);
+            DEFAULT_SCIENCE.Add("Kerbin", 1f);
+            DEFAULT_SCIENCE.Add("Mun", 2.5f);
+            DEFAULT_SCIENCE.Add("Minmus", 2.5f);
+            DEFAULT_SCIENCE.Add("Duna", 5f);
+            DEFAULT_SCIENCE.Add("Ike", 5f);
+            DEFAULT_SCIENCE.Add("Dres", 7.5f);
+            DEFAULT_SCIENCE.Add("Jool", 10f);
+            DEFAULT_SCIENCE.Add("Laythe", 12f);
+            DEFAULT_SCIENCE.Add("Vall", 12f);
+            DEFAULT_SCIENCE.Add("Bop", 10f);
+            DEFAULT_SCIENCE.Add("Tylo", 10f);
+            DEFAULT_SCIENCE.Add("Pol", 10f);
+            DEFAULT_SCIENCE.Add("Eeloo", 20f);
+
+            DEFAULT_SCIENCE_LANDED.Add("Eve", 12.5f);
+            DEFAULT_SCIENCE_LANDED.Add("Tylo", 30f);
+
+            DEFAULT_IMPACTOR.Add("Moho", 14f);
+            DEFAULT_IMPACTOR.Add("Eve", 7f);
+            DEFAULT_IMPACTOR.Add("Gilly", 7f);
+            DEFAULT_IMPACTOR.Add("Kerbin", 0.5f);
+            DEFAULT_IMPACTOR.Add("Mun", 5f);
+            DEFAULT_IMPACTOR.Add("Minmus", 5f);
+            DEFAULT_IMPACTOR.Add("Duna", 7f);
+            DEFAULT_IMPACTOR.Add("Ike", 7f);
+            DEFAULT_IMPACTOR.Add("Dres", 8f);
+            DEFAULT_IMPACTOR.Add("Jool", 9f);
+            DEFAULT_IMPACTOR.Add("Laythe", 11f);
+            DEFAULT_IMPACTOR.Add("Vall", 11f);
+            DEFAULT_IMPACTOR.Add("Bop", 9f);
+            DEFAULT_IMPACTOR.Add("Tylo", 9f);
+            DEFAULT_IMPACTOR.Add("Pol", 9f);
+            DEFAULT_IMPACTOR.Add("Eeloo", 14f);
+
             DEFAULT_MAGNETIC_SCALING.Add("Tylo", 7f);
             DEFAULT_MAGNETIC_SCALING.Add("Laythe", 5f);
             DEFAULT_MAGNETIC_SCALING.Add("Moho", 2f);
@@ -219,28 +261,6 @@ namespace FNPlugin {
 			return (float) -body.atmosphereScaleHeight * 1000.0f * Mathf.Log(1e-6f);
 		}
 
-        public static float getScienceMultiplier(int refbody, bool landed) {
-			float multiplier = 1;
-
-			if (refbody == REF_BODY_DUNA || refbody == REF_BODY_EVE || refbody == REF_BODY_IKE || refbody == REF_BODY_GILLY) {
-				multiplier = 5f;
-			} else if (refbody == REF_BODY_MUN || refbody == REF_BODY_MINMUS) {
-				multiplier = 2.5f;
-			} else if (refbody == REF_BODY_JOOL || refbody == REF_BODY_TYLO || refbody == REF_BODY_POL || refbody == REF_BODY_BOP) {
-				multiplier = 10f;
-			} else if (refbody == REF_BODY_LAYTHE || refbody == REF_BODY_VALL) {
-				multiplier = 12f;
-			} else if (refbody == REF_BODY_EELOO || refbody == REF_BODY_MOHO) {
-				multiplier = 20f;
-			} else if (refbody == REF_BODY_DRES) {
-				multiplier = 7.5f;
-			} else if (refbody == REF_BODY_KERBIN) {
-				multiplier = 1f;
-			} else if (refbody == REF_BODY_KERBOL) {
-				multiplier = 15f;
-			}else {
-				multiplier = 0f;
-			}
         public static string getPropertyOverrideForBody(string name, string type)
         {
             ConfigNode scienceOverrides = getPluginSettingsFile().GetNode("WARP_PLUGIN_PLANET_OVERRIDES");
@@ -253,11 +273,19 @@ namespace FNPlugin {
             return null;
         }
 
+        public static float getScienceMultiplier(string name, bool landed) {
+            float multiplier = 0f;
+            if (DEFAULT_SCIENCE.ContainsKey(name)) multiplier = DEFAULT_SCIENCE[name];
+
+            string scienceOverride = getPropertyOverrideForBody(name, "scienceBase");
+            if (scienceOverride != null) multiplier = float.Parse(scienceOverride);
+
 			if (landed) {
-				if (refbody == REF_BODY_TYLO) {
-					multiplier = multiplier*3f;
-				} else if (refbody == REF_BODY_EVE) {
-					multiplier = multiplier*2.5f;
+                scienceOverride = getPropertyOverrideForBody(name, "scienceLanded");
+                if (scienceOverride != null) {
+                    multiplier = float.Parse(scienceOverride);
+                } else if (DEFAULT_SCIENCE_LANDED.ContainsKey(name)) {
+					multiplier = DEFAULT_SCIENCE_LANDED[name];
 				} else {
 					multiplier = multiplier*2f;
 				}
@@ -266,26 +294,14 @@ namespace FNPlugin {
             return multiplier;
         }
 
-        public static float getImpactorScienceMultiplier(int refbody) {
-            float multiplier = 1;
+        public static float getImpactorScienceMultiplier(string name)
+        {
+            float multiplier = 0f;
+            if (DEFAULT_IMPACTOR.ContainsKey(name)) multiplier = DEFAULT_IMPACTOR[name];
 
-            if (refbody == REF_BODY_DUNA || refbody == REF_BODY_EVE || refbody == REF_BODY_IKE || refbody == REF_BODY_GILLY) {
-                multiplier = 7f;
-            } else if (refbody == REF_BODY_MUN || refbody == REF_BODY_MINMUS) {
-                multiplier = 5f;
-            } else if (refbody == REF_BODY_JOOL || refbody == REF_BODY_TYLO || refbody == REF_BODY_POL || refbody == REF_BODY_BOP) {
-                multiplier = 9f;
-            } else if (refbody == REF_BODY_LAYTHE || refbody == REF_BODY_VALL) {
-                multiplier = 11f;
-            } else if (refbody == REF_BODY_EELOO || refbody == REF_BODY_MOHO) {
-                multiplier = 14f;
-            } else if (refbody == REF_BODY_DRES) {
-                multiplier = 8f;
-            } else if (refbody == REF_BODY_KERBIN) {
-                multiplier = 0.5f;
-            } else {
-                multiplier = 0f;
-            }
+            string scienceOverride = getPropertyOverrideForBody(name, "scienceImpactor");
+            if (scienceOverride != null) multiplier = float.Parse(scienceOverride);
+
             return multiplier;
         }
 

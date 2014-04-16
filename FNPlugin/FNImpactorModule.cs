@@ -134,15 +134,15 @@ namespace FNPlugin {
                     }
 
                     // do sciency stuff
-                    Vector3d surface_vector = (conf_vess.transform.position - FlightGlobals.Bodies[body].transform.position);
+                    Vector3d surface_vector = (conf_vess.transform.position - vessel.mainBody.transform.position);
                     surface_vector = surface_vector.normalized;
                     if (first) {
                         first = false;
                         net_vector = surface_vector;
-                        net_science = 50 * PluginHelper.getImpactorScienceMultiplier(body);
+                        net_science = 50 * PluginHelper.getImpactorScienceMultiplier(vessel.mainBody.name);
                         initial_science = net_science;
                     } else {
-                        net_science += (1.0 - Vector3d.Dot(surface_vector, net_vector.normalized)) * 50 * PluginHelper.getImpactorScienceMultiplier(body);
+                        net_science += (1.0 - Vector3d.Dot(surface_vector, net_vector.normalized)) * 50 * PluginHelper.getImpactorScienceMultiplier(vessel.mainBody.name);
                         net_vector = net_vector + surface_vector;
                     }
                 }

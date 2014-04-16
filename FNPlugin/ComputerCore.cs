@@ -106,7 +106,7 @@ namespace FNPlugin {
 				float altitude_multiplier = (float)(vessel.altitude / (vessel.mainBody.Radius));
 				altitude_multiplier = Math.Max (altitude_multiplier, 1);
 
-				double science_to_add = baseScienceRate * time_diff / 86400 * electrical_power_ratio * PluginHelper.getScienceMultiplier (vessel.mainBody.flightGlobalsIndex,vessel.LandedOrSplashed) / ((float)Math.Sqrt (altitude_multiplier));
+				double science_to_add = baseScienceRate * time_diff / 86400 * electrical_power_ratio * PluginHelper.getScienceMultiplier (vessel.mainBody.name, vessel.LandedOrSplashed) / ((float)Math.Sqrt (altitude_multiplier));
                 science_awaiting_addition = science_to_add;
                 
 				var curReaction = this.part.Modules["ModuleReactionWheel"] as ModuleReactionWheel;
@@ -163,7 +163,7 @@ namespace FNPlugin {
 				electrical_power_ratio = power_returned / upgradedMegajouleRate;
 				float altitude_multiplier = (float) (vessel.altitude / (vessel.mainBody.Radius));
 				altitude_multiplier = Math.Max(altitude_multiplier, 1);
-				science_rate_f = baseScienceRate * PluginHelper.getScienceMultiplier(vessel.mainBody.flightGlobalsIndex,vessel.LandedOrSplashed) / 86400 * power_returned/upgradedMegajouleRate / ((float)Math.Sqrt(altitude_multiplier));
+				science_rate_f = baseScienceRate * PluginHelper.getScienceMultiplier(vessel.mainBody.name, vessel.LandedOrSplashed) / 86400 * power_returned/upgradedMegajouleRate / ((float)Math.Sqrt(altitude_multiplier));
 				//part.RequestResource("Science", -science_rate_f * TimeWarp.fixedDeltaTime);
 				if (ResearchAndDevelopment.Instance != null) {
 					ResearchAndDevelopment.Instance.Science = ResearchAndDevelopment.Instance.Science + science_rate_f * TimeWarp.fixedDeltaTime;
