@@ -29,7 +29,7 @@ namespace FNPlugin {
                 double lat = vessel.mainBody.GetLatitude(vessel.transform.position);
                 double vessel_avg_alt = (vessel.orbit.ApR + vessel.orbit.PeR) / 2.0f;
                 double vessel_inclination = vessel.orbit.inclination;
-				float flux = (VanAllen.getBeltAntiparticles(vessel.mainBody.flightGlobalsIndex, (float)vessel_avg_alt, (float)vessel_inclination) + VanAllen.getBeltAntiparticles(vessel.mainBody.flightGlobalsIndex, (float)vessel_avg_alt, 0.0f))/2.0f;
+				float flux = (VanAllen.getBeltAntiparticles(vessel.mainBody, (float)vessel_avg_alt, (float)vessel_inclination) + VanAllen.getBeltAntiparticles(vessel.mainBody, (float)vessel_avg_alt, 0.0f))/2.0f;
                 //vessel.orbit.
                 double antimatter_to_add = time_diff*flux;
                 //part.RequestResource("Antimatter", -antimatter_to_add);
@@ -39,7 +39,7 @@ namespace FNPlugin {
 
         public override void OnUpdate() {
             float lat = (float)vessel.mainBody.GetLatitude(this.vessel.GetWorldPos3D());
-            float flux = VanAllen.getBeltAntiparticles(vessel.mainBody.flightGlobalsIndex, (float)vessel.altitude, lat);
+            float flux = VanAllen.getBeltAntiparticles(vessel.mainBody, (float)vessel.altitude, lat);
             ParticleFlux = flux.ToString("E");
             collectionRate = collection_rate_d.ToString("0.00") + " mg/day";
         }
@@ -47,7 +47,7 @@ namespace FNPlugin {
         public override void OnFixedUpdate() {
             drawCount++;
             float lat = (float) vessel.mainBody.GetLatitude(this.vessel.GetWorldPos3D());
-            float flux = VanAllen.getBeltAntiparticles(vessel.mainBody.flightGlobalsIndex, (float)vessel.altitude,lat);
+            float flux = VanAllen.getBeltAntiparticles(vessel.mainBody, (float)vessel.altitude,lat);
             //part.RequestResource("Antimatter", -flux * TimeWarp.fixedDeltaTime);
             ORSHelper.fixedRequestResource(part, "Antimatter", -flux * TimeWarp.fixedDeltaTime);
             last_active_time = (float)Planetarium.GetUniversalTime();

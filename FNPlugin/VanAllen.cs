@@ -10,11 +10,11 @@ namespace FNPlugin {
     class VanAllen {
         const double B0 = 3.12E-5;
 		public static Dictionary<string,double> crew_rad_exposure = new Dictionary<string, double> ();
-                
-        public static float getBeltAntiparticles(int refBody, float altitude, float lat) {
+
+        public static float getBeltAntiparticles(CelestialBody crefbody, float altitude, float lat)
+        {
             lat = (float) (lat/180*Math.PI);
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
 
 			double atmosphere_height = PluginHelper.getMaxAtmosphericAltitude (crefbody);
             if (altitude <= atmosphere_height && crefbody.flightGlobalsIndex != 0) {
@@ -38,16 +38,16 @@ namespace FNPlugin {
                 beltparticles = beltparticles / 1000;
             }
 
-			beltparticles = beltparticles * Math.Abs(Math.Cos(lat)) * getSpecialMagneticFieldScaling(refBody);
+            beltparticles = beltparticles * Math.Abs(Math.Cos(lat)) * PluginHelper.getSpecialMagneticFieldScaling(crefbody.name);
 
             return (float) beltparticles;
         }
 
-        public static double getRadiationLevel(int refBody, double altitude, double lat) {
+        public static double getRadiationLevel(CelestialBody crefbody, double altitude, double lat)
+        {
             lat = lat / 180 * Math.PI;
             
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
             double atmosphere = FlightGlobals.getStaticPressure(altitude, crefbody);
             double atmosphere_height = PluginHelper.getMaxAtmosphericAltitude(crefbody);
             double atmosphere_scaling = Math.Exp(-atmosphere);
@@ -71,7 +71,7 @@ namespace FNPlugin {
                 beltparticles = beltparticles / 1000;
             }
 
-            beltparticles = beltparticles * Math.Abs(Math.Cos(lat)) * getSpecialMagneticFieldScaling(refBody)*atmosphere_scaling;
+            beltparticles = beltparticles * Math.Abs(Math.Cos(lat)) * PluginHelper.getSpecialMagneticFieldScaling(crefbody.name) * atmosphere_scaling;
 
             return beltparticles;
         }
@@ -79,13 +79,13 @@ namespace FNPlugin {
         public static double getRadiationDose(Vessel vessel, double rad_hardness) {
             double radiation_level = 0;
             CelestialBody cur_ref_body = FlightGlobals.ActiveVessel.mainBody;
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
 
             ORSPlanetaryResourcePixel res_pixel = ORSPlanetaryResourceMapData.getResourceAvailability(vessel.mainBody, "Thorium", cur_ref_body.GetLatitude(vessel.transform.position), cur_ref_body.GetLongitude(vessel.transform.position));
             double ground_rad = Math.Sqrt(res_pixel.getAmount() * 9e6) / 24 / 365.25 / Math.Max(vessel.altitude / 870, 1);
-            double rad = VanAllen.getRadiationLevel(cur_ref_body.flightGlobalsIndex, (float)FlightGlobals.ship_altitude, (float)FlightGlobals.ship_latitude);
+            double rad = VanAllen.getRadiationLevel(cur_ref_body, (float)FlightGlobals.ship_altitude, (float)FlightGlobals.ship_latitude);
             double divisor = Math.Pow(cur_ref_body.Radius / crefkerbin.Radius, 2.0);
-            double mag_field_strength = VanAllen.getBeltMagneticFieldMag(cur_ref_body.flightGlobalsIndex, (float)FlightGlobals.ship_altitude, (float)FlightGlobals.ship_latitude);
+            double mag_field_strength = VanAllen.getBeltMagneticFieldMag(cur_ref_body, (float)FlightGlobals.ship_altitude, (float)FlightGlobals.ship_latitude);
            // if (cur_ref_body.flightGlobalsIndex == PluginHelper.REF_BODY_KERBOL) {
             //    rad = rad * 1e6;
             //}
@@ -101,7 +101,7 @@ namespace FNPlugin {
                 }
                 //rad = VanAllen.getBeltAntiparticles (cur_ref_body.flightGlobalsIndex, (float) (Vector3d.Distance(FlightGlobals.ship_position,cur_ref_body.transform.position)-cur_ref_body.Radius), 0.0f);
                 //rad = VanAllen.getRadiationLevel(cur_ref_body.flightGlobalsIndex, (Vector3d.Distance(FlightGlobals.ship_position, cur_ref_body.transform.position) - cur_ref_body.Radius), 0.0);
-                mag_field_strength += VanAllen.getBeltMagneticFieldMag(cur_ref_body.flightGlobalsIndex, (float)(Vector3d.Distance(FlightGlobals.ship_position, cur_ref_body.transform.position) - cur_ref_body.Radius), (float)FlightGlobals.ship_latitude);
+                mag_field_strength += VanAllen.getBeltMagneticFieldMag(cur_ref_body, (float)(Vector3d.Distance(FlightGlobals.ship_position, cur_ref_body.transform.position) - cur_ref_body.Radius), (float)FlightGlobals.ship_latitude);
                 //rad_level += rad;
             }
             if (cur_ref_body.flightGlobalsIndex != PluginHelper.REF_BODY_KERBOL) {
@@ -111,20 +111,20 @@ namespace FNPlugin {
             return radiation_level;
         }
 
-        public static double getPeakBeltAltitude(int refBody, double altitude, double lat) {
+        public static double getPeakBeltAltitude(CelestialBody crefbody, double altitude, double lat)
+        {
             lat = lat / 180 * Math.PI;
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
             double rp = crefbody.Radius;
             double relrp = rp / crefkerbin.Radius;
             double peakbelt = 1.5 * crefkerbin.Radius * relrp;
             return peakbelt;
         }
 
-        public static float getBeltMagneticFieldMag(int refBody, float altitude, float lat) {
+        public static float getBeltMagneticFieldMag(CelestialBody crefbody, float altitude, float lat)
+        {
             double mlat = lat / 180 * Math.PI + Math.PI/2;
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
 
             double mp = crefbody.Mass;
             double rp = crefbody.Radius;
@@ -136,15 +136,15 @@ namespace FNPlugin {
 
 
             double altituded = ((double)altitude)+rp;
-            double Bmag = B0 / relrt *relmp * Math.Pow((rp / altituded), 3) * Math.Sqrt(1 + 3 * Math.Pow(Math.Cos(mlat), 2)) * getSpecialMagneticFieldScaling(refBody);
+            double Bmag = B0 / relrt * relmp * Math.Pow((rp / altituded), 3) * Math.Sqrt(1 + 3 * Math.Pow(Math.Cos(mlat), 2)) * PluginHelper.getSpecialMagneticFieldScaling(crefbody.name);
 
             return (float)Bmag;
         }
 
-        public static float getBeltMagneticFieldRadial(int refBody, float altitude, float lat) {
+        public static float getBeltMagneticFieldRadial(CelestialBody crefbody, float altitude, float lat)
+        {
             double mlat = lat / 180 * Math.PI + Math.PI/2;
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
                         
             double mp = crefbody.Mass;
             double rp = crefbody.Radius;
@@ -154,15 +154,15 @@ namespace FNPlugin {
             double relrt = rt / crefkerbin.rotationPeriod;
 
             double altituded = ((double)altitude) + rp;
-			double Bmag = -2 / relrt *relmp * B0 * Math.Pow((rp / altituded), 3) * Math.Cos(mlat)* getSpecialMagneticFieldScaling(refBody);
+            double Bmag = -2 / relrt * relmp * B0 * Math.Pow((rp / altituded), 3) * Math.Cos(mlat) * PluginHelper.getSpecialMagneticFieldScaling(crefbody.name);
 
             return (float)Bmag;
         }
 
-        public static float getBeltMagneticFieldAzimuthal(int refBody, float altitude, float lat) {
+        public static float getBeltMagneticFieldAzimuthal(CelestialBody crefbody, float altitude, float lat)
+        {
             double mlat = lat / 180 * Math.PI + Math.PI/2;
-            CelestialBody crefbody = FlightGlobals.fetch.bodies[refBody];
-            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[1];
+            CelestialBody crefkerbin = FlightGlobals.fetch.bodies[PluginHelper.REF_BODY_KERBIN];
 
             double mp = crefbody.Mass;
             double rp = crefbody.Radius;
@@ -172,37 +172,10 @@ namespace FNPlugin {
             double relrt = rt / crefkerbin.rotationPeriod;
 
             double altituded = ((double)altitude) + rp;
-			double Bmag = -relmp * B0 / relrt * Math.Pow((rp / altituded), 3) * Math.Sin(mlat)* getSpecialMagneticFieldScaling(refBody);
+			double Bmag = -relmp * B0 / relrt * Math.Pow((rp / altituded), 3) * Math.Sin(mlat)* PluginHelper.getSpecialMagneticFieldScaling(crefbody.name);
 
             return (float)Bmag;
         }
-
-		public static double getSpecialMagneticFieldScaling(int refBody) {
-			double special_scaling = 1;
-			if (refBody == PluginHelper.REF_BODY_TYLO) {
-				special_scaling = 7;
-			}
-			if (refBody == PluginHelper.REF_BODY_LAYTHE) {
-				special_scaling = 5;
-			}
-			if (refBody == PluginHelper.REF_BODY_MOHO) {
-				special_scaling = 2;
-			}
-			if (refBody == PluginHelper.REF_BODY_JOOL) {
-				special_scaling = 3;
-			}
-			if (refBody == PluginHelper.REF_BODY_EVE) {
-				special_scaling = 2;
-			}
-			if (refBody == PluginHelper.REF_BODY_MUN || refBody == PluginHelper.REF_BODY_IKE) {
-				special_scaling = 0.2;
-			}
-			if (refBody == PluginHelper.REF_BODY_GILLY || refBody == PluginHelper.REF_BODY_BOP || refBody == PluginHelper.REF_BODY_POL) {
-				special_scaling = 0.05;
-			}
-			return special_scaling;
-		}
-
         
     }
 }

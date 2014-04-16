@@ -9,6 +9,8 @@ namespace FNPlugin {
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
 	public class PluginHelper : MonoBehaviour {
         public const double FIXED_SAT_ALTITUDE = 13599840256;
+        public static Dictionary<string, float> DEFAULT_MAGNETIC_SCALING = new Dictionary<string, float>();
+
         public const int REF_BODY_KERBOL = 0;
         public const int REF_BODY_KERBIN = 1;
         public const int REF_BODY_MUN = 2;
@@ -50,6 +52,20 @@ namespace FNPlugin {
         protected static int installed_tech_tree_version_id = 0;
         protected static int new_tech_tree_version_id = 0;
         
+
+        private void SetupDefaultScience()
+        {
+            DEFAULT_MAGNETIC_SCALING.Add("Tylo", 7f);
+            DEFAULT_MAGNETIC_SCALING.Add("Laythe", 5f);
+            DEFAULT_MAGNETIC_SCALING.Add("Moho", 2f);
+            DEFAULT_MAGNETIC_SCALING.Add("Jool", 3f);
+            DEFAULT_MAGNETIC_SCALING.Add("Eve", 2f);
+            DEFAULT_MAGNETIC_SCALING.Add("Mun", 0.2f);
+            DEFAULT_MAGNETIC_SCALING.Add("Ike", 0.2f);
+            DEFAULT_MAGNETIC_SCALING.Add("Gilly", 0.05f);
+            DEFAULT_MAGNETIC_SCALING.Add("Bop", 0.05f);
+            DEFAULT_MAGNETIC_SCALING.Add("Pol", 0.05f);
+        }
         
         
         public static string getPluginSaveFilePath() {
@@ -262,7 +278,15 @@ namespace FNPlugin {
             return multiplier;
         }
 
+        public static double getSpecialMagneticFieldScaling(string name)
+        {
+            float scaling = DEFAULT_MAGNETIC_SCALING.ContainsKey(name) ? DEFAULT_MAGNETIC_SCALING[name] : 1.0f;
+            return scaling;
+        }
+
         public void Start() {
+            SetupDefaultScience();
+
             tech_window = new TechUpdateWindow();
             tech_checked = false;
 
